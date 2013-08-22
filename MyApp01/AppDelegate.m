@@ -7,6 +7,18 @@
 //
 
 #import "AppDelegate.h"
+#import "SliderRootViewController.h"
+#import "MainNavigationController.h"
+#import "MainViewController.h"
+#import "LeftMenuViewController.h"
+#import "RightMenuViewController.h"
+
+
+@interface AppDelegate()
+- (void)InitLocationManager;
+- (void)InitMap;
+
+@end
 
 @implementation AppDelegate
 
@@ -22,13 +34,30 @@
 @synthesize managedObjectContext = _managedObjectContext;
 @synthesize managedObjectModel = _managedObjectModel;
 @synthesize persistentStoreCoordinator = _persistentStoreCoordinator;
+//自定屬性
+@synthesize m_SingletonMapView;
+@synthesize m_Constants;
+@synthesize m_locationManager;
+@synthesize m_UserCoor;
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
+    appDelegate = self;
     self.window = [[[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]] autorelease];
     // Override point for customization after application launch.
     self.window.backgroundColor = [UIColor whiteColor];
     [self.window makeKeyAndVisible];
+    
+    self.m_Constants = [[Constants alloc]init];
+    [self InitMap];
+    [self InitLocationManager];
+    
+    SliderRootViewController *RootVC = [[SliderRootViewController alloc]init];
+    [self.window setRootViewController:RootVC];
+    [RootVC release];
+    
+
+    
     return YES;
 }
 
@@ -154,5 +183,30 @@
 {
     return [[[NSFileManager defaultManager] URLsForDirectory:NSDocumentDirectory inDomains:NSUserDomainMask] lastObject];
 }
-
+#pragma Custom Methods
+//============================================================================================================
+- (void)InitMap
+{
+    self.m_SingletonMapView = [[MKMapView alloc]initWithFrame:self.m_Constants.m_MapRect];
+    [self.m_SingletonMapView setMapType:MKMapTypeStandard];
+    
+    [self.m_SingletonMapView setZoomEnabled:YES];
+    [self.m_SingletonMapView setScrollEnabled:YES];
+    [self.m_SingletonMapView setAutoresizesSubviews:YES];
+    [self.m_SingletonMapView setUserInteractionEnabled:YES];
+    [self.m_SingletonMapView setMultipleTouchEnabled:YES];
+    [self.m_SingletonMapView setHidden:YES];
+}
+//============================================================================================================
+- (void)InitLocationManager
+{
+    if(nil == self.m_locationManager)
+    {
+        self.m_locationManager = [[CLLocationManager alloc] init];
+        self.m_locationManager.delegate = self;
+        self.m_locationManager.desiredAccuracy = kCLLocationAccuracyBest;
+        self.m_locationManager.distanceFilter = m_Constants.m_MAP_Distance;
+    }
+}
+//============================================================================================================
 @end
