@@ -16,10 +16,13 @@
 #import "LeftMenuViewController.h"
 #import "RightMenuViewController.h"
 #import "SliderRootViewController.h"
+#import "WebServiceClient.h"
+#import "JSON.h"
+#import "MAINBPickerView.h"
 
 #define DEGREES_TO_RADIANS(angle) (angle / 180.0 * M_PI)
 
-@interface MainViewController ()
+@interface MainViewController ()<WebServiceClientDelegate>
 - (void)LoadAnnotation;
 - (void)InitMap;
 - (void)InitList;
@@ -32,6 +35,7 @@
 @synthesize m_bIsMap;
 @synthesize m_TableView;
 @synthesize m_mtaTableViewData;
+@synthesize m_MainSliderView;
 
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
@@ -48,19 +52,47 @@
     [super viewDidLoad];
 	// Do any additional setup after loading the view.
     self.m_bIsMap = YES;
-    self.navigationItem.title = @"地圖模式";
+    UILabel *lblTitle = [[UILabel alloc]initWithFrame:CGRectMake(0, 0, 320, 44)];
+    [lblTitle setTextColor:[UIColor blackColor]];
+    [lblTitle setText:@"地圖模式"];
+    [lblTitle setTextAlignment:NSTextAlignmentCenter];
+//    self.navigationItem.titleView = lblTitle;
+    [lblTitle setBackgroundColor:[UIColor clearColor]];
+    [lblTitle release];
+
     //初始化地圖
     [self InitMap];
     //更新 GPS 位置
     [appDelegate.m_locationManager startUpdatingLocation];
-
-    UIBarButtonItem *leftItem = [[UIBarButtonItem alloc] initWithTitle:@"Left" style:UIBarButtonItemStyleBordered target:self action:@selector(leftSelected)];
+    UIImage *imgBarItem = [UIImage imageNamed:@"btnDivision.PNG"];
+    UIView *containingView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, imgBarItem.size.width, imgBarItem.size.height)];
+    
+    UIButton *btn = [UIButton buttonWithType:UIButtonTypeCustom];
+    btn.frame = CGRectMake(-5, 0, 75, 44);
+    [btn setImage:imgBarItem forState:UIControlStateNormal];
+    [imgBarItem release];
+    [btn addTarget:self action:@selector(leftSelected) forControlEvents:UIControlEventTouchUpInside];
+    [containingView addSubview:btn];
+    UIBarButtonItem *leftItem = [[UIBarButtonItem alloc]initWithCustomView:containingView];
+    [containingView release];
     self.navigationItem.leftBarButtonItem = leftItem;
     [leftItem release];
     
-    UIBarButtonItem *rightItem = [[UIBarButtonItem alloc] initWithTitle:@"Right" style:UIBarButtonItemStyleBordered target:self action:@selector(rightSelected)];
+    imgBarItem = [UIImage imageNamed:@"btnDisplay.PNG"];
+    containingView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, imgBarItem.size.width, imgBarItem.size.height)];
+    btn = [UIButton buttonWithType:UIButtonTypeCustom];
+    btn.frame = CGRectMake(5, 0, 75, 44);
+    [btn setImage:imgBarItem forState:UIControlStateNormal];
+    [imgBarItem release];
+    [btn addTarget:self action:@selector(rightSelected) forControlEvents:UIControlEventTouchUpInside];
+    [containingView addSubview:btn];
+    UIBarButtonItem *rightItem = [[UIBarButtonItem alloc]initWithCustomView:containingView];
     self.navigationItem.rightBarButtonItem = rightItem;
+    [containingView release];
     [rightItem release];
+    
+    [self.navigationController.navigationBar setBackgroundImage:[UIImage imageNamed:@"Head01.PNG"] forBarMetrics:UIBarMetricsDefault];
+        
     
 //    [self AddRadar];
     
@@ -68,7 +100,7 @@
     [self InitList];
     
     //測試螞
-    [self AddTestDatas];
+//    [self AddTestDatas];
     //測試碼結束
 //    [appDelegate.m_locationManager startUpdatingHeading];
     
@@ -99,6 +131,7 @@
     {
         [m_mtaTableViewData removeAllObjects];
     }
+    [self.m_MainSliderView release];
     [super dealloc];
 }
 - (void)didReceiveMemoryWarning
@@ -122,12 +155,12 @@
     
     
     [appDelegate.m_SingletonMapView setShowsUserLocation:YES];
-    [appDelegate.m_SingletonMapView setRegion:regionCenter];
-    
+    [appDelegate.m_SingletonMapView setRegion:regionCenter];    
     appDelegate.m_UserCoor = newLocation;
-    
-    
-    [self LoadAnnotation];
+
+    [self QueryNearByHospitalData];
+//    [self QuerySpecialty];
+    return;
 }
 //=================================================================================
 - (void)locationManager:(CLLocationManager *)manager didUpdateHeading:(CLHeading *)newHeading
@@ -138,36 +171,31 @@
 //=================================================================================
 #pragma mark - MKMapViewDelegate methods
 -(void) mapView: (MKMapView *) mapView annotationView: (MKAnnotationView *) view calloutAccessoryControlTapped: (UIControl *) control {
-
     
     if([self.navigationController isKindOfClass:[MainNavigationController class]])
     {
         MainNavigationController *MainVC = (MainNavigationController*)self.navigationController;
         [MainVC.m_rootVC ShowChildeViews:NO];
     }
+    
+    int index = [view.reuseIdentifier intValue];
+    DetailData  *Data = [self.m_mtaTableViewData objectAtIndex:index];
+
+    
     DetailViewController   *DetailVC = [DetailViewController alloc];
-    [self.navigationController pushViewController:DetailVC animated:YES];
+    DetailVC.m_ClinicName = Data.m_Name;
+    DetailVC.m_ClinicAddr = Data.m_Addr;
 
+    CGRect frame = DetailVC.view.frame;
+    frame.origin.y += 24;
+    DetailVC.view.frame = frame;
     
-//    LeftMenuViewController *LeftMenuVC = [MainVC.m_rootVC.childViewControllers objectAtIndex:1];
-//    [LeftMenuVC.view setHidden:YES];
-//    
-//    RightMenuViewController *RightMenuVC = [MainVC.m_rootVC.childViewControllers objectAtIndex:2];
-//    [RightMenuVC.view setHidden:YES];
+//    [self PresentDetailViewInHalfScreen:DetailVC];
     
-//    [self.navigationController pushViewController:DetailVC animated:YES];
-
-//    self.navigationController.vi
-//    if([self.parentViewController isKindOfClass:[MainNavigationController class]])
-//    {
-//        NSLog(@"Test");
-//    }
-//    if([self.navigationController isKindOfClass:[MainNavigationController class]])
-//    {
-//        NSLog(@"Test");
-//    }
+    [self.navigationController presentViewController:DetailVC animated:YES completion:nil];
     
-//    [DetailVC release];
+//    [self PresendModalViewFullScreen:DetailVC];
+    
 }
 //=================================================================================
 -(MKAnnotationView *) mapView: (MKMapView *) mapView viewForAnnotation: (id <MKAnnotation>) annotation {
@@ -181,6 +209,7 @@
 		pinView.pinColor = MKPinAnnotationColorGreen;
 		pinView.animatesDrop = YES;
 		pinView.canShowCallout = YES;
+        
 		pinView.rightCalloutAccessoryView = [UIButton buttonWithType:UIButtonTypeDetailDisclosure];
 	}
     return pinView;
@@ -211,6 +240,7 @@
             [view removeFromSuperview];
         }
     }
+
     DetailData  *Data = [self.m_mtaTableViewData objectAtIndex:indexPath.row];
     UILabel *lblClinicName = [[UILabel alloc]initWithFrame:CGRectMake(10, 10, 300, 30)];
     [lblClinicName setText:Data.m_Name];
@@ -268,6 +298,91 @@
     [self.navigationController pushViewController:DetailVC animated:YES];
 }
 //=================================================================================
+#pragma mark - WebServiceClientDelegate
+-(void) WebServiceClient: (WebServiceClient *) _vwscClient didCompletespecialtyrWithResponseCode: (NSString *) _sResponseCode withResponseMessage: (NSString *) _sResponseMessage  withVersionControllerResponse: (NSString *) _sResponseData
+{
+    NSLog(@"responseString = %@",_sResponseData);
+    id jsonObject = [_sResponseData JSONValue];
+    NSMutableArray *mtaAllData = jsonObject;
+    NSLog(@"mtaAllData = %@",mtaAllData);
+    
+//    NSMutableDictionary *Dict = [mtaAllData objectAtIndex:0];
+    
+    for(NSMutableDictionary *Dict in mtaAllData)
+    {
+        NSLog(@"specialty_id = %@",[Dict objectForKey:@"specialty_id"]);
+        NSLog(@"specialty_name = %@",[Dict objectForKey:@"specialty_name"]);
+    }
+    
+}
+//=================================================================================
+-(void) WebServiceClient: (WebServiceClient *) _vwscClient didCompleteQueryNearByHostpitalWithResponseCode: (NSString *) _sResponseCode withResponseMessage: (NSString *) _sResponseMessage  withVersionControllerResponse: (NSString *) _sResponseData
+{
+    NSLog(@"responseString = %@",_sResponseData);
+    id jsonObject = [_sResponseData JSONValue];
+    
+    NSMutableArray *mtaAllData = jsonObject;    
+//    NSMutableDictionary* mtaDict = jsonObject;
+//    NSDictionary* TempDict =
+//    [mtaDict objectForKey:@"1212"];
+    NSLog(@"mtaAllData = %@",mtaAllData);
+    
+
+    
+    for(NSMutableDictionary *Dict in mtaAllData)
+    {
+        DetailData* Data = [[DetailData alloc]Init];
+        Data.m_Addr = [Dict objectForKey:@"hospital_address"];
+        Data.m_hospital_id = [Dict objectForKey:@"hospital_id"];
+        Data.m_Name = [Dict objectForKey:@"hospital_name"];
+        Data.m_hospital_phone = [Dict objectForKey:@"hospital_phone"];
+        Data.m_Latituted = [Dict objectForKey:@"latitude"];
+        Data.m_Longtututed = [Dict objectForKey:@"longitude"];
+        
+        NSArray* DoctorDataArray = [Dict objectForKey:@"doctors"];
+        for(NSDictionary* Dict in DoctorDataArray)
+        {
+            DoctorData* DoctorDataObject = [DoctorData alloc];
+            DoctorDataObject.m_business_magazine_id = [Dict objectForKey:@"business_magazine_id"];
+            DoctorDataObject.m_doctor_experience = [Dict objectForKey:@"doctor_experience"];
+            DoctorDataObject.m_doctor_id = [Dict objectForKey:@"doctor_id"];
+            DoctorDataObject.m_doctor_name = [Dict objectForKey:@"doctor_name"];
+            DoctorDataObject.m_doctor_professional = [Dict objectForKey:@"doctor_professional"];
+            DoctorDataObject.m_specialty_id = [Dict objectForKey:@"specialty_id"];
+            DoctorDataObject.m_specialty_name = [Dict objectForKey:@"specialty_name"];
+            DoctorDataObject.m_subspecialty_id = [Dict objectForKey:@"subspecialty_id"];
+            DoctorDataObject.m_subspecialty_name = [Dict objectForKey:@"subspecialty_name"];
+            DoctorDataObject.m_summary_id = [Dict objectForKey:@"summary_id"];
+            
+            [Data.m_mtaDocDatas addObject:DoctorDataObject];
+            [DoctorDataObject release];
+        }
+        
+        
+        
+        Data.m_bBefore = NO;
+        Data.m_bMagzie = NO;
+        [self.m_mtaTableViewData addObject:Data];
+        [Data release];
+        NSLog(@"Data.m_Name = %@",Data.m_Name);
+    }
+    [self LoadAnnotation];
+    
+//    Data.m_Name = @"第一耳鼻喉科";
+//    Data.m_Addr = @"台北市中山北路一段123號";
+//    Data.m_Latituted = @"25.042322";
+//    Data.m_Longtututed = @"121.533669";
+//    
+//    [Data.m_mtaDocNames addObject:[NSString stringWithFormat:@"%@",@"金城武"]];
+//    [Data.m_mtaDocNames addObject:[NSString stringWithFormat:@"%@",@"梁家輝"]];
+//    
+//    Data.m_bBefore = NO;
+//    Data.m_bMagzie = NO;
+//
+//    [self.m_mtaTableViewData addObject:Data];
+//    [Data release];
+}
+//=================================================================================
 #pragma mark - Custom Methods
 - (void)leftSelected
 {
@@ -288,8 +403,9 @@
 - (void)LoadAnnotation
 {
     NSMutableArray *mtaAnnotations = [NSMutableArray array];
+    int i = 0;
     for(DetailData *Data in self.m_mtaTableViewData)
-    {        
+    {
         CLLocation *location = [[CLLocation alloc]initWithLatitude:[Data.m_Latituted floatValue]
                                                          longitude:[Data.m_Longtututed floatValue]];
         CustomAnnotation *annotation = [[CustomAnnotation alloc]
@@ -297,9 +413,14 @@
                                         title:Data.m_Name
                                         subtitle:Data.m_Addr];
         [mtaAnnotations addObject:annotation];
+        
+        annotation.tag = i;
+        i++;
 //        [annotation release];
     }
-    [appDelegate.m_SingletonMapView  addAnnotations:mtaAnnotations];
+    [appDelegate.m_SingletonMapView removeAnnotations:appDelegate.m_SingletonMapView.annotations];
+    [appDelegate.m_SingletonMapView addAnnotations:mtaAnnotations];
+
 //    [mtaAnnotations removeAllObjects];
 //    [mtaAnnotations release];
     
@@ -453,8 +574,10 @@
     Data.m_Latituted = @"25.042322";
     Data.m_Longtututed = @"121.533669";
     
-    [Data.m_mtaDocNames addObject:[NSString stringWithFormat:@"%@",@"金城武"]];
-    [Data.m_mtaDocNames addObject:[NSString stringWithFormat:@"%@",@"梁家輝"]];
+    
+    
+//    [Data.m_mtaDocNames addObject:[NSString stringWithFormat:@"%@",@"金城武"]];
+//    [Data.m_mtaDocNames addObject:[NSString stringWithFormat:@"%@",@"梁家輝"]];
     
     Data.m_bBefore = NO;
     Data.m_bMagzie = NO;
@@ -469,14 +592,154 @@
     Data.m_Latituted = @"25.043605";
     Data.m_Longtututed = @"121.533151";
     
-    [Data.m_mtaDocNames addObject:[NSString stringWithFormat:@"%@",@"金士傑"]];
-    [Data.m_mtaDocNames addObject:[NSString stringWithFormat:@"%@",@"顧寶明"]];
+//    [Data.m_mtaDocNames addObject:[NSString stringWithFormat:@"%@",@"金士傑"]];
+//    [Data.m_mtaDocNames addObject:[NSString stringWithFormat:@"%@",@"顧寶明"]];
     
     Data.m_bBefore = YES;
     Data.m_bMagzie = NO;
     [self.m_mtaTableViewData addObject:Data];
     [Data release];
 
+}
+//=================================================================================
+- (void)PresentDetailViewInHalfScreen:(DetailViewController*)DetailViewController
+{
+    [self InitMainSliderView];
+    [self.m_MainSliderView addSubview:DetailViewController.view];
+    [self.m_MainSliderView sendSubviewToBack:DetailViewController.view];
+    
+    self.m_MainSliderView.frame = CGRectMake(0.0f, 480.0f, 320.0f, 260.0f);
+    [UIView setAnimationsEnabled: YES];
+    
+    
+    [UIView beginAnimations: nil context: nil];
+    CGRect rectAnimate = self.m_MainSliderView.frame;
+    rectAnimate.origin.y = [appDelegate.window bounds].size.height / 2 + 20;
+    self.m_MainSliderView.frame = rectAnimate;
+    [UIView commitAnimations];
+}
+//=================================================================================
+- (void)PresendModalViewFullScreen:(DetailViewController*)DetailViewController
+{
+    [self InitMainSliderView];
+    [self.m_MainSliderView addSubview:DetailViewController.view];
+    [self.m_MainSliderView sendSubviewToBack:DetailViewController.view];
+    
+    self.m_MainSliderView.frame = CGRectMake(0.0f, 480.0f, 320.0f, 260.0f);
+    [UIView setAnimationsEnabled: YES];
+    [UIView beginAnimations: nil context: nil];
+    CGRect rectAnimate = self.m_MainSliderView.frame;
+    rectAnimate.origin.y = [appDelegate.window bounds].size.height / 2 + 20;
+//    rectAnimate.origin.y = -80;
+    self.m_MainSliderView.frame = rectAnimate;
+    [UIView commitAnimations];
+}
+//=================================================================================
+- (void)PresentDetailViewFullScrenn
+{
+//    [self InitMainSliderView];
+    [self.m_MainSliderView removeCancelBtn];
+//    [self.m_MainSliderView addSubview:DetailViewController.view];
+    float fHeight = 480;
+    if(appDelegate.m_Constants.m_bIsIPhone5)
+    {
+        fHeight = 568;
+    }
+    
+    self.m_MainSliderView.frame = CGRectMake(0.0f, 480.0f, 320.0f, fHeight);
+    [UIView setAnimationsEnabled: YES];
+    [UIView beginAnimations: nil context: nil];
+    CGRect rectAnimate = self.m_MainSliderView.frame;
+    rectAnimate.origin.y = 0;
+    //    rectAnimate.origin.y = 172.0f + self.view.bounds.origin.y - [[UIApplication sharedApplication] statusBarFrame].size.height;
+    self.m_MainSliderView.frame = rectAnimate;
+    [UIView commitAnimations];
+}
+//=================================================================================
+- (void)DismissDetailViewInHalfScreen
+{
+    // UIPickerView 消失的動畫處理
+    [UIView beginAnimations: nil context: nil];
+    CGRect rectPicker = self.m_MainSliderView.frame;
+    rectPicker.origin.y = 480.0f;
+    self.m_MainSliderView.frame = rectPicker;
+    [UIView commitAnimations];
+    //動畫處理結束
+}
+//=================================================================================
+- (void)InitMainSliderView
+{
+    if(nil == m_MainSliderView)
+    {
+        self.m_MainSliderView = [[MainSliderView alloc] initWithFrame: CGRectMake(0.0f, 480.0f, 320.0f, 260.0f)];
+        self.m_MainSliderView.btnDone.target = self;
+        [self.m_MainSliderView.btnDone setAction:@selector(DoneSliderView:)];
+        self.m_MainSliderView.btnCancel.target = self;
+        [self.m_MainSliderView.btnCancel setAction:@selector(OpenSliderViewContent:)];
+        
+        [self.m_MainSliderView.m_SliderButton addTarget:self action:@selector(OpenSliderViewContent:) forControlEvents:UIControlEventTouchUpInside];
+        [self.m_MainSliderView.m_CloseButton addTarget:self action:@selector(DoneSliderView:) forControlEvents:UIControlEventTouchUpInside];
+        
+        
+        
+    }
+    if(nil == self.m_MainSliderView.superview)
+    {
+        [self.view addSubview:self.m_MainSliderView];
+        [self.view bringSubviewToFront:self.m_MainSliderView];
+    }
+}
+//=================================================================================
+- (void)DoneSliderView:(id)_Sender
+{
+    
+    [m_MainSliderView.m_SliderButton setHidden:NO];
+    [m_MainSliderView.m_CloseButton setHidden:YES];
+
+    CGRect frame = m_MainSliderView.m_SliderButton.frame;
+    frame.origin.y = 120;
+    [m_MainSliderView.m_SliderButton setFrame:frame];
+    [m_MainSliderView.m_CloseButton setFrame:frame];
+
+    [self DismissDetailViewInHalfScreen];
+    [self.m_MainSliderView AddCancelBtn];
+}
+//=================================================================================
+- (void)OpenSliderViewContent:(id)_Sender
+{
+    [self PresentDetailViewFullScrenn];
+//    UIButton* TempButton = (UIButton*)_Sender;
+
+    [m_MainSliderView.m_SliderButton setHidden:YES];
+    [m_MainSliderView.m_CloseButton setHidden:NO];
+    
+    CGRect frame = m_MainSliderView.m_SliderButton.frame;    
+    frame.origin.y = 380;
+    [m_MainSliderView.m_SliderButton setFrame:frame];
+    [m_MainSliderView.m_CloseButton setFrame:frame];
+    
+    
+//    [TempButton addTarget:self action:@selector(DoneSliderView:) forControlEvents:UIControlEventTouchUpInside];
+//    [self PresentDetailViewFullScrenn];
+}
+//=================================================================================
+- (void)QueryNearByHospitalDataWithSpecialtyID:(NSString*)ID
+{
+    [appDelegate QueryNearByHospitalDataWithSpecialtyID:ID withDelegate:self];  
+}
+//=================================================================================
+- (void)QueryNearByHospitalData
+{
+    [self QueryNearByHospitalDataWithSpecialtyID:@"2"];
+}
+//=================================================================================
+- (void)QuerySpecialty
+{
+    NSString* sTemp = [[NSString alloc]initWithFormat:@"http://ireullin.asuscomm.com:10080/myclinic/mobile/specialty"];
+    WebServiceClient * WS = [[WebServiceClient alloc]init];
+    WS.wscDelegate = self;
+    [WS setSHttpFunCode:appDelegate.m_Constants.m_HTTPREQEUST_SPECIALTY];
+    [WS getHttpRequest:sTemp withPostData:nil withMethod:@"POST"];
 }
 //=================================================================================
 @end

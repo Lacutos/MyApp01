@@ -12,9 +12,9 @@
 #import "MainViewController.h"
 #import "LeftMenuViewController.h"
 #import "RightMenuViewController.h"
-
-
-@interface AppDelegate()
+#import "DetailData.h"
+#import "JSON.h"
+@interface AppDelegate()<WebServiceClientDelegate>
 - (void)InitLocationManager;
 - (void)InitMap;
 
@@ -183,6 +183,44 @@
 {
     return [[[NSFileManager defaultManager] URLsForDirectory:NSDocumentDirectory inDomains:NSUserDomainMask] lastObject];
 }
+
+#pragma WebServiceClientDelegate
+//============================================================================================================
+-(void) WebServiceClient: (WebServiceClient *) _vwscClient didCompleteQueryNearByHostpitalWithResponseCode: (NSString *) _sResponseCode withResponseMessage: (NSString *) _sResponseMessage  withVersionControllerResponse: (NSString *) _sResponseData
+{
+    NSLog(@"responseString = %@",_sResponseData);
+    id jsonObject = [_sResponseData JSONValue];
+    
+    NSMutableArray *mtaAllData = jsonObject;
+    NSLog(@"mtaAllData = %@",mtaAllData);
+    
+    
+    for(NSMutableDictionary *Dict in mtaAllData)
+    {
+        DetailData* DetailDataObj = [[DetailData alloc]Init];
+        DetailDataObj.m_Distance = [Dict objectForKey:@"distance"];
+        
+        DetailDataObj.m_Addr = [Dict objectForKey:@"hospital_address"];
+        
+
+        [Dict objectForKey:@"hospital_id"];
+        DetailDataObj.m_Name = [Dict objectForKey:@"hospital_name"];
+        [Dict objectForKey:@"hospital_phone"];
+        [Dict objectForKey:@"hospital_address"];
+        [Dict objectForKey:@"latitude"];
+        [Dict objectForKey:@"longitude"];
+        
+//        Data.m_Name = [Dict objectForKey:@"hospital_name"];
+//        Data.m_Addr = [Dict objectForKey:@"hospital_address"];
+//        Data.m_Latituted = [Dict objectForKey:@"latitude"];
+//        Data.m_Longtututed = [Dict objectForKey:@"longitude"];
+//        [Data.m_mtaDocNames addObject:[Dict objectForKey:@"doctor_name"]];
+//        Data.m_bBefore = NO;
+//        Data.m_bMagzie = NO;
+////        [self.m_mtaTableViewData addObject:Data];
+//        NSLog(@"Data.m_Name = %@",Data.m_Name);
+    }
+}
 #pragma Custom Methods
 //============================================================================================================
 - (void)InitMap
@@ -207,6 +245,39 @@
         self.m_locationManager.desiredAccuracy = kCLLocationAccuracyBest;
         self.m_locationManager.distanceFilter = m_Constants.m_MAP_Distance;
     }
+}
+//============================================================================================================
+- (void)QueryNearByHospitalDataWithSpecialtyID:(NSString*)ID withDelegate:(id)Delegate
+{
+    //    "specialty_id":id,
+    //    "longitude":經度,
+    //    "latitude":緯度,
+    //    "o_udid":o_udid,
+    //    "max_count":資料上限筆數
+    //    "max_distance":半徑範圍
+    WebServiceClient * WS = [[WebServiceClient alloc]init];
+    WS.wscDelegate = Delegate;
+    [WS setSHttpFunCode:appDelegate.m_Constants.m_HTTPREQEUST_NEARBY_HOSPITALS];
+    
+//    NSMutableDictionary *Dict = [NSfMutableDictionary dictionary];
+    NSString *latitude = [NSString stringWithFormat:@"%f",appDelegate.m_UserCoor.coordinate.latitude];
+    NSString *longitude = [NSString stringWithFormat:@"%f",appDelegate.m_UserCoor.coordinate.longitude];
+    
+//    [Dict setObject:ID forKey:@"specialty_id"];
+//    [Dict setObject:longitude forKey:@"longitude"];
+//    [Dict setObject:latitude forKey:@"latitude"];
+//    [Dict setObject:@"12345" forKey:@"o_udid"];
+//    [Dict setObject:@"30" forKey:@"max_count"];
+//    [Dict setObject:@"5000" forKey:@"max_distance"];
+    
+    NSString *jsonString = [NSString stringWithFormat:@"{\"specialty_id\":\"%@\",\"longitude\":\"%@\",\"latitude\":\"%@\",\"o_udid\":\"%@\",\"max_count\":\"%@\",\"max_distance\":\"%@\"}", ID, longitude,latitude,@"12345",@"30",@"500"];
+    NSLog(@"jsonString = %@",jsonString);
+    NSData *requestdata = [jsonString dataUsingEncoding:NSUTF8StringEncoding];
+    
+    
+    NSString* sTemp = [[NSString alloc]initWithFormat:@"http://ireullin.asuscomm.com:10080/myclinic/mobile/query"];
+    /** data is ready now, and you can use it **/
+    [WS getHttpRequest:sTemp withPostData:requestdata withMethod:@"POST"];
 }
 //============================================================================================================
 @end

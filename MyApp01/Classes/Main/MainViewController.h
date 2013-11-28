@@ -10,6 +10,7 @@
 #import <CoreLocation/CoreLocation.h>
 #import <MapKit/MapKit.h>
 #import "ListTable.h"
+#import "MAINBPickerView.h"
 @interface MainViewController : UIViewController
 <
 MKMapViewDelegate,
@@ -21,12 +22,15 @@ UITableViewDelegate
     BOOL                m_bIsMap;
     ListTable*          m_TableView;
     NSMutableArray*     m_mtaTableViewData;
+    MainSliderView*     m_MainSliderView;
 }
 @property(nonatomic, assign)BOOL                m_bIsMap;
 @property(nonatomic, retain)ListTable*          m_TableView;
 @property(nonatomic, retain)NSMutableArray*     m_mtaTableViewData;
+@property(nonatomic, retain)MainSliderView*     m_MainSliderView;
 - (void)leftSelected;
 - (void)rightSelected;
 - (void)SwitchMapOrList;
 - (void)SwitcToList;
+- (void)LoadAnnotation;
 @end

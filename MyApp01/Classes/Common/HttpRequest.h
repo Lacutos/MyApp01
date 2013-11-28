@@ -18,6 +18,7 @@
 @interface HttpRequest: NSObject {
 	NSObject <HttpRequestDelegate, NSObject> *httpRequestDelegate;
 	NSString            *sRequestBody;
+    NSData              *PostData;
 	NSMutableData       *mtdaReceiveData;
 	NSMutableURLRequest *mtuURLRequest;
 	NSURLConnection     *urlConnection;
@@ -33,6 +34,7 @@
 
 @property (nonatomic, retain) NSObject <HttpRequestDelegate, NSObject> *httpRequestDelegate;
 @property (nonatomic, retain) NSString* sRequestBody;
+@property (nonatomic, retain) NSData*   PostData;
 @property (nonatomic, retain) NSMutableData *mtdaReceiveData;
 @property (nonatomic, retain) NSMutableURLRequest *mtuURLRequest;
 @property (nonatomic, retain) NSURLConnection *urlConnection;

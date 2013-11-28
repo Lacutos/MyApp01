@@ -12,7 +12,7 @@ enum{
     kMainFrameXWhenRightIsShown = -280,
     kMainFrameXWhenRightToShow  = -100,
     kMainFrameXWhenLeftToShow = 100,
-    kMainFrameXWhenLeftIsShown = 280
+    kMainFrameXWhenLeftIsShown = 290
 }kMainFrameX;
 
 @interface DetailCommentData : NSObject
@@ -81,11 +81,19 @@ enum{
 @property(nonatomic, retain)NSString        *m_CONNECTION_Timeout;
 @property(nonatomic, retain)NSString        *m_CONNECTION_NoServer;
 @property(nonatomic, retain)NSString        *m_CONNECTION_Unknown;
+@property(nonatomic, retain)NSString        *m_CONNECTION_Success;
 @property(nonatomic, retain)NSString        *m_ED_NoInternet;
 @property(nonatomic, retain)NSString        *m_ED_TimeOut;
 @property(nonatomic, retain)NSString        *m_ED_UnKnown;
 
 @property(nonatomic, assign)BOOL            m_ISDISPLAYDEBUGLOG;
+@property(nonatomic, assign)CGFloat         m_HTTPConnectionTimeout;
+
+@property(nonatomic, retain)NSString        *m_HTTPREQEUST_SPECIALTY;
+@property(nonatomic, retain)NSString        *m_HTTPREQEUST_NEARBY_HOSPITALS;
+@property(nonatomic, retain)NSString        *m_ALERT_TITLE;
+@property(nonatomic, retain)NSString        *m_BTN_ALERTVIEW_CONFIRM;
+
 
 //@property(nonatomic, retain)NSString *RM_Timeout;
 //@property(nonatomic, retain)NSString *RM_Unknown;

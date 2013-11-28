@@ -40,15 +40,17 @@
 	// Do any additional setup after loading the view.
     
     //測試碼
-    self.m_ClinicName = @"順暢腸胃科";
-    self.m_ClinicAddr = @"這是診所的地址，總共的長度是二十個中文字";
+//    self.m_ClinicName = @"順暢腸胃科";
+//    self.m_ClinicAddr = @"這是診所的地址，總共的長度是二十個中文字";
     //測試碼結束
     [self InitTopView];
     [self InitMidView];
     [self InitClinicDataView];
     [self InitCommentView];
     [self InitEvaluationView];
+    [self ShowConetent:self.m_selectedView];
 }
+
 
 - (void)didReceiveMemoryWarning
 {
@@ -164,10 +166,36 @@
     //上方的 View
     UIView* TopView = [[UIView alloc]initWithFrame:CGRectMake(0, 0, 320, 110)];
     TopView.tag = 101;
-    [TopView setBackgroundColor:[UIColor grayColor]];
+    
+//    [TopView setBackgroundColor:[UIColor clearColor]];
+    UIImage* BackGroundImg = [UIImage imageNamed:@"mainDownBlock.PNG"];
+    
+    UIImageView* imgView = [[UIImageView alloc]initWithImage:BackGroundImg];
+    [TopView addSubview:imgView];
+    [TopView sendSubviewToBack:imgView];
+    [imgView release];
+    
+    
+//    [TopView setBackgroundColor:[UIColor clearColor]];
+//    UIColor *background = [[UIColor alloc] initWithPatternImage:[UIImage imageNamed:@"mainDownBlock.PNG"]];
+//    TopView.backgroundColor = background;
+//    [background release];
+    //左上角關閉鈕
+    UIButton    *btnClose = [UIButton buttonWithType:UIButtonTypeCustom];
+    [btnClose setBackgroundColor:[UIColor clearColor]];
+    [btnClose setTitle:@"X" forState:UIControlStateNormal];
+    [btnClose.titleLabel setFont:appDelegate.m_Constants.m_FONT_19_BOLD];
+    [btnClose setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
+    [btnClose addTarget:self action:@selector(BtnFunction:) forControlEvents:UIControlEventTouchUpInside];
+    btnClose.frame = CGRectMake(5, 5, 20, 20);
+    [btnClose setTag:1010];
+    [TopView addSubview:btnClose];
+    
     //打電話按鈕
     UIButton    *btnCall = [UIButton buttonWithType:UIButtonTypeCustom];
-    [btnCall setBackgroundColor:[UIColor blackColor]];
+    [btnCall setImage:[UIImage imageNamed:@"btnCall.PNG"] forState:UIControlStateNormal];
+    [btnCall setImage:[UIImage imageNamed:@"btnCallClick.PNG"] forState:UIControlStateHighlighted];    
+    [btnCall setBackgroundColor:[UIColor clearColor]];
     [btnCall setTag:1011];
     btnCall.frame = CGRectMake(220, 5, 100, 100);
     [TopView addSubview:btnCall];
@@ -250,7 +278,22 @@
 //=================================================================================
 - (void)InitClinicDataView
 {
+    float Height = 480;
+    if(appDelegate.m_Constants.m_bIsIPhone5)
+    {
+        Height = 564;
+    }
+
+    UITableView *CommentView = [[UITableView alloc]initWithFrame:CGRectMake(0, 170, 320, Height)];
+    [CommentView setTag:301];
     
+    [CommentView setDelegate:self];
+    [CommentView setDataSource:self];
+    
+    
+    [CommentView setHidden:YES];
+    [self.view addSubview:CommentView];
+
 }
 //=================================================================================
 - (void)InitCommentView
@@ -328,6 +371,11 @@
     UIButton*   btnSender = (UIButton*)_Sender;
     
     switch (btnSender.tag) {
+        case 1010:
+        {
+            [self dismissViewControllerAnimated:YES completion:nil];
+        }
+            break;
         case 2011:
             self.m_selectedView = 0;
             break;

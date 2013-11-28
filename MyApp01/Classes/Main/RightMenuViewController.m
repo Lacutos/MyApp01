@@ -67,7 +67,7 @@
             [view removeFromSuperview];
         }
     }
-    
+    [cell setSelectionStyle:UITableViewCellSelectionStyleNone];
     if(0 == indexPath.row)
     {
         
@@ -78,6 +78,7 @@
             [cell.textLabel setText:@"          地圖顯示"];
 
         [cell.textLabel setFont:appDelegate.m_Constants.m_FONT_19_BOLD];
+        [cell setSelectionStyle:UITableViewCellSelectionStyleBlue];
     }
     else if(1 == indexPath.row)
     {
@@ -138,7 +139,7 @@
     //初始化 搜尋列
     UITextField *textFieldSearch = [[UITextField alloc]initWithFrame:CGRectMake(44, 6, 200, 28)];
     [textFieldSearch setBorderStyle:UITextBorderStyleRoundedRect];
-    [textFieldSearch setPlaceholder:@"搜尋"];
+    [textFieldSearch setPlaceholder:@"請輸入醫生姓名"];
     [textFieldSearch setContentVerticalAlignment:UIControlContentVerticalAlignmentCenter];
     [textFieldSearch setDelegate:self];
     [viewHeader addSubview: textFieldSearch];
@@ -201,6 +202,8 @@
     [self.m_TblView setDataSource:self];
     [self.m_TblView setDelegate:self];
     self.view = self.m_TblView;
+    
+    [self.m_TblView setSeparatorStyle:UITableViewCellSeparatorStyleNone];
 
 }
 //=================================================================================

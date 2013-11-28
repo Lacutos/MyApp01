@@ -12,6 +12,7 @@
 @synthesize httpRequestDelegate, sRequestBody, mtdaReceiveData, mtuURLRequest, urlConnection;
 @synthesize timeoutInterval, timerTimeout, sSessionID, sSoapAction, iHTTPStatusCode;
 @synthesize isPost, isDefaultAlertForError;
+@synthesize PostData;
 
 -(void) dealloc {
 	[self.httpRequestDelegate release];
@@ -58,8 +59,9 @@
 	
 	if (self.isPost) {
 		[self.mtuURLRequest setHTTPMethod: @"POST"];
-		[self.mtuURLRequest setHTTPBody: [self.sRequestBody dataUsingEncoding: NSUTF8StringEncoding allowLossyConversion: YES]];
+		[self.mtuURLRequest setHTTPBody: self.PostData];
 		[self.mtuURLRequest setValue: [NSString stringWithFormat: @"%d", [self.sRequestBody length]] forHTTPHeaderField: @"Content-Length"];
+        [self.mtuURLRequest setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
 		
 		if ((self.sSoapAction != nil) && (! [sSoapAction isEqualToString: @""]))
 			[self.mtuURLRequest setValue: sSoapAction forHTTPHeaderField: @"Soapaction"];

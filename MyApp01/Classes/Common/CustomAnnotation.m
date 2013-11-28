@@ -30,7 +30,7 @@
     if (self = [super init]) {
 		coordinate            = _coordinate;
 		self.title            = _title;
-		self.subtitle         = _subtitle;
+//		self.subtitle         = _subtitle;
 	}
     return self;
 }
@@ -40,7 +40,7 @@
     if (self = [super init]) {
 		coordinate            = _coordinate;
 		self.title            = _title;
-		self.subtitle         = _subtitle;
+//		self.subtitle         = _subtitle;
 	}
     return self;
 }

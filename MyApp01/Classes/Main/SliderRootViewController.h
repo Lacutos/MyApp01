@@ -17,9 +17,20 @@
     LeftMenuViewController      *m_leftVC;
     RightMenuViewController     *m_rightVC;
 }
+@property(nonatomic, retain)MainNavigationController    *m_navVC;
+@property(nonatomic, retain)MainViewController          *m_mainVC;
+@property(nonatomic, retain)LeftMenuViewController      *m_leftVC;
+@property(nonatomic, retain)RightMenuViewController     *m_rightVC;
+
+
+
 - (void)bringToFront:(BOOL)isLeft;
 - (void)LeftBackToMain;
 - (void)RightdidselectedRowAtIndexPath;
 - (void)ShowChildeViews:(BOOL)bShow;
 - (BOOL)MapOrList;
+
+
+- (void)AddMainVCAnnotationData:(NSMutableArray*)DataArray;
+
 @end

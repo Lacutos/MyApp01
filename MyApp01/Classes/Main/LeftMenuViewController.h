@@ -7,6 +7,7 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "DetailData.h"
 
 @interface LeftMenuViewController : UIViewController
 <
@@ -20,5 +21,5 @@ UITableViewDelegate
 @property(nonatomic, retain) NSMutableArray     *m_TableViewDataList;
 @property(nonatomic, retain) UITableView        *m_TblView;
 //當 View 離開時會做的事寫在這
-- (void)Hidden;
+//- (void)Hidden;
 @end

@@ -10,6 +10,7 @@
 #import <MapKit/MapKit.h>
 #import <CoreLocation/CoreLocation.h>
 #import "Constants.h"
+#import "WebServiceClient.h"
 
 
 @class AppDelegate;
@@ -30,12 +31,13 @@ CLLocationManagerDelegate
 @property (readonly, strong, nonatomic) NSPersistentStoreCoordinator *persistentStoreCoordinator;
 //自定屬性
 @property (nonatomic, retain) MKMapView         *m_SingletonMapView;
-@property (nonatomic, retain) Constants      *m_Constants;
+@property (nonatomic, retain) Constants         *m_Constants;
 @property (nonatomic, retain) CLLocationManager *m_locationManager;
 @property (nonatomic, retain) CLLocation        *m_UserCoor;
 
 
 - (void)saveContext;
 - (NSURL *)applicationDocumentsDirectory;
+- (void)QueryNearByHospitalDataWithSpecialtyID:(NSString*)ID withDelegate:(id)Delegate;
 
 @end

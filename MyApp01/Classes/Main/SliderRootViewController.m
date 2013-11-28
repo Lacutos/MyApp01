@@ -18,6 +18,11 @@
 
 @implementation SliderRootViewController
 
+@synthesize m_navVC;
+@synthesize m_mainVC;
+@synthesize m_leftVC;
+@synthesize m_rightVC;
+
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
@@ -108,6 +113,13 @@
 - (BOOL)MapOrList
 {
     return m_mainVC.m_bIsMap;
+}
+//=================================================================================
+- (void)AddMainVCAnnotationData:(NSMutableArray*)DataArray
+{
+    [m_mainVC.m_mtaTableViewData removeAllObjects];
+    m_mainVC.m_mtaTableViewData = [NSMutableArray arrayWithArray:DataArray];
+    [m_mainVC LoadAnnotation];
 }
 //=================================================================================
 @end

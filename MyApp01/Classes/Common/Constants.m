@@ -32,12 +32,19 @@
 @synthesize m_CONNECTION_Timeout;
 @synthesize m_CONNECTION_NoServer;
 @synthesize m_CONNECTION_Unknown;
+@synthesize m_CONNECTION_Success;
+
 @synthesize m_ED_NoInternet;
 @synthesize m_ED_TimeOut;
 @synthesize m_ED_UnKnown;
 
 @synthesize m_ISDISPLAYDEBUGLOG;
+@synthesize m_HTTPConnectionTimeout;
 
+@synthesize m_HTTPREQEUST_SPECIALTY;
+@synthesize m_HTTPREQEUST_NEARBY_HOSPITALS;
+@synthesize m_ALERT_TITLE;
+@synthesize m_BTN_ALERTVIEW_CONFIRM;
 
 
 -(id) init
@@ -53,7 +60,7 @@
     self.m_UserLatitudeDeltaDefault = 0.009;
     self.m_UserLongitudeDeltaDefault = 0.009;
     
-    self.m_LeftNavigationBarTitle = @"...";    //科別
+    self.m_LeftNavigationBarTitle = @"科別";    //科別
     self.m_RightNavigationBarTitle = @"...";   //選項
     self.m_CLOSE = @"關閉";
     self.m_SHARE = @"分享";
@@ -71,12 +78,20 @@
     self.m_CONNECTION_Timeout = @"-1001";
     self.m_CONNECTION_NoServer = @"-1004";
     self.m_CONNECTION_Unknown = @"UnKnow";
+    self.m_CONNECTION_Success = @"0000";
     
     self.m_ED_NoInternet = @"NO Internet Service";
     self.m_ED_TimeOut = @"TimeOut";
     self.m_ED_UnKnown = @"UnKnown";
     
     self.m_ISDISPLAYDEBUGLOG = YES;
+    self.m_HTTPConnectionTimeout = 1000.0;
+    
+    self.m_HTTPREQEUST_SPECIALTY = @"HOSPITAL_SPECIALTY";
+    self.m_HTTPREQEUST_NEARBY_HOSPITALS = @"NEARBY_HOSTPITALS";
+    
+    self.m_ALERT_TITLE = @"訊息";
+    self.m_BTN_ALERTVIEW_CONFIRM = @"確定";
     return self;
 }
 
